@@ -1,0 +1,11 @@
+2026-01-18 19:46:26 UTC
+Windows-10-10.0.19045
+Ren'Py 8.3.3.24111502
+
+Early init took 0.11s
+Loading error handling took 0.09s
+Loading script took 6.62s
+Loading save slot metadata took 0.05s
+Loading persistent took 0.00s
+Set script version to: None (alternate path)
+ - Init at launcher/game/download.rpyc:22 took 1.03125 s.

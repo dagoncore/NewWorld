@@ -435,17 +435,6 @@ label alex_dialog:
             n "Алекс дает вам что-то в знак благодарности за доверие."
             # Логика получения предмета
             jump alex_dialog
-        "Покажи киску":
-            alex "Конечно!"
-            hide alex_happy
-            scene bg_alex_pussy
-            n "Алекс демонстрирует свои дырочки."
-            window hide
-            $ renpy.pause()
-            window auto
-            scene bg_main
-            show alex_happy at left
-            jump alex_dialog
         "Уйти":
             hide alex_happy
             jump day_keep

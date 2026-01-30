@@ -2,9 +2,9 @@
 errors listed below, and try again.
 
 
-File "game/script.rpy", line 287: choice menuitem expects a non-empty block.
-    "Купить нож (20 [gold_icon] тепломарок)":
-                                             ^
+File "game/script.rpy", line 533: a non-constant keyword argument like 'tooltip get_item_tooltip(item_id)' is not allowed after a python block.
+    tooltip get_item_tooltip(item_id)
+                                     ^
 
 Ren'Py Version: Ren'Py 8.3.3.24111502
-Wed Feb  5 23:05:14 2025
+Fri Jan 30 22:15:31 2026

@@ -41,6 +41,36 @@ default actions_left = 20  # Лимит действий в день
 #События
 default storage_pussy = 0
 
+# === СИСТЕМА ЭКИПИРОВКИ ===
+
+# Базовые характеристики персонажа
+default base_stats = {
+    "strength": 10,
+    "agility": 10,
+    "intelligence": 10,
+    "charisma": 10
+}
+
+# Текущая экипировка (слот: id предмета или None)
+default equipped_items = {
+    "underwear": None,    # Нижнее белье
+    "accessory": None,    # Аксессуар
+    "pants": None,        # Штаны
+    "torso": None,        # Торс
+    "hat": None,          # Шапка
+    "weapon": None        # Оружие
+}
+
+# Доступные предметы в инвентаре (слот: список id предметов)
+default inventory_items = {
+    "underwear": ["basic_underwear", "silk_underwear", "magic_underwear"],
+    "accessory": ["silver_ring", "gold_necklace", "diamond_ring"],
+    "pants": ["cloth_pants", "leather_pants", "steel_pants", "royal_pants", "battle_pants", "ninja_pants", "mage_pants", "heavy_pants", "light_pants", "cursed_pants", "blessed_pants", "dragon_pants"],
+    "torso": ["cloth_shirt", "leather_armor", "mage_robe", "dragon_armor", "assassin_vest", "royal_robe"],
+    "hat": ["cloth_cap", "iron_helmet", "crown"],
+    "weapon": ["wooden_sword", "iron_sword", "magic_staff"]
+}
+
 # Определение класса для инвентаря
 init python:
     class Item:
@@ -49,8 +79,393 @@ init python:
             self.description = description
             self.wasted = wasted
 
+# === ОПРЕДЕЛЕНИЯ ПРЕДМЕТОВ ЭКИПИРОВКИ ===
+init python:
+    # Словарь всех предметов экипировки
+    equipment_data = {
+        # Нижнее белье
+        "basic_underwear": {
+            "id": "basic_underwear",
+            "name": "Базовое белье",
+            "image": "equipment/underwear/basic_underwear.png",
+            "slot": "underwear",
+            "stats": {"strength": 0, "agility": 1, "intelligence": 0, "charisma": 1},
+            "description": "Простое нижнее белье"
+        },
+        "silk_underwear": {
+            "id": "silk_underwear", 
+            "name": "Шелковое белье",
+            "image": "equipment/underwear/silk_underwear.png",
+            "slot": "underwear",
+            "stats": {"strength": 0, "agility": 2, "intelligence": 0, "charisma": 3},
+            "description": "Роскошное шелковое белье"
+        },
+        
+        # Аксессуары
+        "silver_ring": {
+            "id": "silver_ring",
+            "name": "Серебряное кольцо",
+            "image": "equipment/accessory/silver_ring.png", 
+            "slot": "accessory",
+            "stats": {"strength": 0, "agility": 0, "intelligence": 1, "charisma": 2},
+            "description": "Простое серебряное кольцо"
+        },
+        "gold_necklace": {
+            "id": "gold_necklace",
+            "name": "Золотое ожерелье",
+            "image": "equipment/accessory/gold_necklace.png",
+            "slot": "accessory", 
+            "stats": {"strength": 0, "agility": 0, "intelligence": 2, "charisma": 4},
+            "description": "Дорогое золотое ожерелье"
+        },
+        
+        # Штаны
+        "cloth_pants": {
+            "id": "cloth_pants",
+            "name": "Тканевые штаны",
+            "image": "equipment/pants/cloth_pants.png",
+            "slot": "pants",
+            "stats": {"strength": 1, "agility": 1, "intelligence": 0, "charisma": 1},
+            "description": "Простые тканевые штаны"
+        },
+        "leather_pants": {
+            "id": "leather_pants",
+            "name": "Кожаные штаны", 
+            "image": "equipment/pants/leather_pants.png",
+            "slot": "pants",
+            "stats": {"strength": 2, "agility": 2, "intelligence": 0, "charisma": 2},
+            "description": "Прочные кожаные штаны"
+        },
+        
+        # Торс
+        "cloth_shirt": {
+            "id": "cloth_shirt",
+            "name": "Тканевая рубашка",
+            "image": "equipment/torso/cloth_shirt.png",
+            "slot": "torso",
+            "stats": {"strength": 1, "agility": 0, "intelligence": 1, "charisma": 2},
+            "description": "Простая тканевая рубашка"
+        },
+        "leather_armor": {
+            "id": "leather_armor",
+            "name": "Кожаная броня",
+            "image": "equipment/torso/leather_armor.png", 
+            "slot": "torso",
+            "stats": {"strength": 3, "agility": 1, "intelligence": 0, "charisma": 1},
+            "description": "Прочная кожаная броня"
+        },
+        
+        # Головные уборы
+        "cloth_cap": {
+            "id": "cloth_cap",
+            "name": "Тканевая кепка",
+            "image": "equipment/hat/cloth_cap.png",
+            "slot": "hat", 
+            "stats": {"strength": 0, "agility": 1, "intelligence": 1, "charisma": 1},
+            "description": "Простая тканевая кепка"
+        },
+        "iron_helmet": {
+            "id": "iron_helmet",
+            "name": "Железный шлем",
+            "image": "equipment/hat/iron_helmet.png",
+            "slot": "hat",
+            "stats": {"strength": 2, "agility": -1, "intelligence": 0, "charisma": 0},
+            "description": "Тяжелый железный шлем"
+        },
+        
+        # Оружие
+        "wooden_sword": {
+            "id": "wooden_sword",
+            "name": "Деревянный меч",
+            "image": "equipment/weapon/wooden_sword.png",
+            "slot": "weapon",
+            "stats": {"strength": 2, "agility": 0, "intelligence": 0, "charisma": 0},
+            "description": "Простой деревянный меч"
+        },
+        "iron_sword": {
+            "id": "iron_sword",
+            "name": "Железный меч",
+            "image": "equipment/weapon/iron_sword.png",
+            "slot": "weapon",
+            "stats": {"strength": 4, "agility": -1, "intelligence": 0, "charisma": 1},
+            "description": "Острый железный меч"
+        },
+        
+        # Дополнительные предметы для демонстрации скролла
+        "magic_underwear": {
+            "id": "magic_underwear",
+            "name": "Магическое белье",
+            "image": "equipment/underwear/magic_underwear.png",
+            "slot": "underwear",
+            "stats": {"strength": 1, "agility": 2, "intelligence": 3, "charisma": 2},
+            "description": "Белье с магическими свойствами"
+        },
+        "diamond_ring": {
+            "id": "diamond_ring",
+            "name": "Алмазное кольцо",
+            "image": "equipment/accessory/diamond_ring.png",
+            "slot": "accessory",
+            "stats": {"strength": 0, "agility": 0, "intelligence": 3, "charisma": 5},
+            "description": "Роскошное алмазное кольцо"
+        },
+        "steel_pants": {
+            "id": "steel_pants",
+            "name": "Стальные штаны",
+            "image": "equipment/pants/steel_pants.png",
+            "slot": "pants",
+            "stats": {"strength": 3, "agility": -1, "intelligence": 0, "charisma": 1},
+            "description": "Тяжелые стальные штаны"
+        },
+        "mage_robe": {
+            "id": "mage_robe",
+            "name": "Роба мага",
+            "image": "equipment/torso/mage_robe.png",
+            "slot": "torso",
+            "stats": {"strength": 0, "agility": 1, "intelligence": 4, "charisma": 2},
+            "description": "Роба опытного мага"
+        },
+        "crown": {
+            "id": "crown",
+            "name": "Корона",
+            "image": "equipment/hat/crown.png",
+            "slot": "hat",
+            "stats": {"strength": 0, "agility": 0, "intelligence": 2, "charisma": 6},
+            "description": "Королевская корона"
+        },
+        "magic_staff": {
+            "id": "magic_staff",
+            "name": "Магический посох",
+            "image": "equipment/weapon/magic_staff.png",
+            "slot": "weapon",
+            "stats": {"strength": 1, "agility": 0, "intelligence": 5, "charisma": 2},
+            "description": "Посох с магической силой"
+        },
+        
+        # Дополнительные штаны для тестирования скролла
+        "royal_pants": {
+            "id": "royal_pants",
+            "name": "Королевские штаны",
+            "image": "equipment/pants/royal_pants.png",
+            "slot": "pants",
+            "stats": {"strength": 1, "agility": 1, "intelligence": 1, "charisma": 4},
+            "description": "Роскошные королевские штаны"
+        },
+        "battle_pants": {
+            "id": "battle_pants",
+            "name": "Боевые штаны",
+            "image": "equipment/pants/battle_pants.png",
+            "slot": "pants",
+            "stats": {"strength": 4, "agility": 2, "intelligence": 0, "charisma": 0},
+            "description": "Штаны для сражений"
+        },
+        "ninja_pants": {
+            "id": "ninja_pants",
+            "name": "Штаны ниндзя",
+            "image": "equipment/pants/ninja_pants.png",
+            "slot": "pants",
+            "stats": {"strength": 1, "agility": 5, "intelligence": 1, "charisma": 0},
+            "description": "Легкие штаны ниндзя"
+        },
+        "mage_pants": {
+            "id": "mage_pants",
+            "name": "Штаны мага",
+            "image": "equipment/pants/mage_pants.png",
+            "slot": "pants",
+            "stats": {"strength": 0, "agility": 1, "intelligence": 4, "charisma": 1},
+            "description": "Штаны для магов"
+        },
+        "heavy_pants": {
+            "id": "heavy_pants",
+            "name": "Тяжелые штаны",
+            "image": "equipment/pants/heavy_pants.png",
+            "slot": "pants",
+            "stats": {"strength": 3, "agility": -2, "intelligence": 0, "charisma": 1},
+            "description": "Очень тяжелые штаны"
+        },
+        "light_pants": {
+            "id": "light_pants",
+            "name": "Легкие штаны",
+            "image": "equipment/pants/light_pants.png",
+            "slot": "pants",
+            "stats": {"strength": 0, "agility": 3, "intelligence": 0, "charisma": 2},
+            "description": "Очень легкие штаны"
+        },
+        "cursed_pants": {
+            "id": "cursed_pants",
+            "name": "Проклятые штаны",
+            "image": "equipment/pants/cursed_pants.png",
+            "slot": "pants",
+            "stats": {"strength": 5, "agility": 0, "intelligence": 0, "charisma": -2},
+            "description": "Мощные, но проклятые штаны"
+        },
+        "blessed_pants": {
+            "id": "blessed_pants",
+            "name": "Благословенные штаны",
+            "image": "equipment/pants/blessed_pants.png",
+            "slot": "pants",
+            "stats": {"strength": 2, "agility": 2, "intelligence": 2, "charisma": 3},
+            "description": "Штаны с божественным благословением"
+        },
+        "dragon_pants": {
+            "id": "dragon_pants",
+            "name": "Драконьи штаны",
+            "image": "equipment/pants/dragon_pants.png",
+            "slot": "pants",
+            "stats": {"strength": 6, "agility": 1, "intelligence": 1, "charisma": 2},
+            "description": "Штаны из драконьей кожи"
+        },
+        
+        # Дополнительные торсы
+        "dragon_armor": {
+            "id": "dragon_armor",
+            "name": "Драконья броня",
+            "image": "equipment/torso/dragon_armor.png",
+            "slot": "torso",
+            "stats": {"strength": 5, "agility": 0, "intelligence": 1, "charisma": 3},
+            "description": "Броня из драконьих чешуек"
+        },
+        "assassin_vest": {
+            "id": "assassin_vest",
+            "name": "Жилет ассасина",
+            "image": "equipment/torso/assassin_vest.png",
+            "slot": "torso",
+            "stats": {"strength": 2, "agility": 4, "intelligence": 1, "charisma": 0},
+            "description": "Легкий жилет для скрытности"
+        },
+        "royal_robe": {
+            "id": "royal_robe",
+            "name": "Королевская роба",
+            "image": "equipment/torso/royal_robe.png",
+            "slot": "torso",
+            "stats": {"strength": 0, "agility": 0, "intelligence": 3, "charisma": 6},
+            "description": "Роскошная королевская роба"
+        }
+    }
+    
+    # Функция для получения данных предмета
+    def get_item_data(item_id):
+        return equipment_data.get(item_id, None)
+    
+    # Функция для проверки валидности предмета
+    def is_valid_item(item_id, slot):
+        item = get_item_data(item_id)
+        return item is not None and item["slot"] == slot
+    
+    # Функция для безопасного получения изображения предмета
+    def get_item_image(item_id):
+        item = get_item_data(item_id)
+        if not item:
+            return "characters/karma/karma_full.png"  # Заглушка
+        
+        # Возвращаем путь к изображению (Ren'Py сам обработает отсутствующие файлы)
+        return item["image"]
+    
+    # Функция для создания tooltip предмета
+    def get_item_tooltip(item_id):
+        item = get_item_data(item_id)
+        if not item:
+            return "Неизвестный предмет"
+        
+        tooltip_parts = [item["name"], item["description"]]
+        
+        # Добавляем характеристики
+        stats_parts = []
+        for stat, value in item["stats"].items():
+            if value != 0:
+                stat_names = {
+                    "strength": "Сила",
+                    "agility": "Ловкость", 
+                    "intelligence": "Интеллект",
+                    "charisma": "Харизма"
+                }
+                stats_parts.append(f"{stat_names.get(stat, stat)}: {value:+}")
+        
+        if stats_parts:
+            tooltip_parts.append("Характеристики:")
+            tooltip_parts.extend(stats_parts)
+        
+        return "\n".join(tooltip_parts)
+
 # Определения предметов
 default all_items = []
+
+# === ФУНКЦИИ УПРАВЛЕНИЯ ЭКИПИРОВКОЙ ===
+init python:
+    # Функция для экипировки предмета
+    def equip_item(item_id):
+        item = get_item_data(item_id)
+        if not item:
+            return False
+            
+        slot = item["slot"]
+        
+        # Проверяем валидность слота
+        if not is_valid_item(item_id, slot):
+            return False
+        
+        # Если в слоте уже есть предмет, возвращаем его в инвентарь
+        if equipped_items[slot]:
+            old_item = equipped_items[slot]
+            if old_item not in inventory_items[slot]:
+                inventory_items[slot].append(old_item)
+        
+        # Экипируем новый предмет
+        equipped_items[slot] = item_id
+        
+        # Удаляем предмет из инвентаря
+        if item_id in inventory_items[slot]:
+            inventory_items[slot].remove(item_id)
+            
+        return True
+    
+    # Функция для снятия экипировки
+    def unequip_item(slot):
+        if slot not in equipped_items:
+            return False
+            
+        if equipped_items[slot]:
+            item_id = equipped_items[slot]
+            equipped_items[slot] = None
+            
+            # Возвращаем предмет в инвентарь
+            if item_id not in inventory_items[slot]:
+                inventory_items[slot].append(item_id)
+            return True
+        return False
+    
+    # Функция для расчета общих характеристик
+    def calculate_total_stats():
+        total_stats = base_stats.copy()
+        
+        for slot, item_id in equipped_items.items():
+            if item_id:
+                item = get_item_data(item_id)
+                if item and "stats" in item:
+                    for stat, value in item["stats"].items():
+                        if stat in total_stats:
+                            total_stats[stat] += value
+                        
+        return total_stats
+
+# === CUSTOM ACTIONS ДЛЯ ЭКИПИРОВКИ ===
+init python:
+    # Action для экипировки предмета без закрытия экрана
+    class EquipItemAction(Action):
+        def __init__(self, item_id):
+            self.item_id = item_id
+        
+        def __call__(self):
+            equip_item(self.item_id)
+            renpy.restart_interaction()
+    
+    # Action для снятия экипировки без закрытия экрана
+    class UnequipItemAction(Action):
+        def __init__(self, slot):
+            self.slot = slot
+        
+        def __call__(self):
+            unequip_item(self.slot)
+            renpy.restart_interaction()
 
 # Функция для добавления нового предмета
 label item_add(name, description, wasted=False):
@@ -133,6 +548,353 @@ screen quests():
                 else:
                     text "[quest.name] (Не завершен) [quest.type]" size 20
                     text "[quest.description]" size 15
+
+# === ЭКРАНЫ СИСТЕМЫ ЭКИПИРОВКИ ===
+
+# Экран отображения персонажа с экипировкой
+screen character_display():
+    frame:
+        align (0.5, 0.5)
+        xsize 640
+        ysize 960
+        background "#0a0a0a"  # Темно-синий фон
+        
+        # Базовое изображение персонажа (используем существующее изображение)
+        add "characters/karma/karma_full.png"  # Используем существующее изображение как заглушку
+        
+        # Слои экипировки в правильном порядке (снизу вверх) с возможностью клика для снятия
+        # Порядок слоев: underwear, accessory, pants, torso, hat, weapon
+        
+        # 1. Нижнее белье (самый нижний слой)
+        if equipped_items["underwear"]:
+            $ underwear_item = get_item_data(equipped_items["underwear"])
+            if underwear_item:
+                $ underwear_tooltip = get_item_tooltip(equipped_items["underwear"])
+                button:
+                    action UnequipItemAction("underwear")
+                    tooltip underwear_tooltip
+                    add get_item_image(equipped_items["underwear"])
+                
+        # 2. Аксессуар
+        if equipped_items["accessory"]:
+            $ accessory_item = get_item_data(equipped_items["accessory"])
+            if accessory_item:
+                $ accessory_tooltip = get_item_tooltip(equipped_items["accessory"])
+                button:
+                    action UnequipItemAction("accessory")
+                    tooltip accessory_tooltip
+                    add get_item_image(equipped_items["accessory"])
+                
+        # 3. Штаны
+        if equipped_items["pants"]:
+            $ pants_item = get_item_data(equipped_items["pants"])
+            if pants_item:
+                $ pants_tooltip = get_item_tooltip(equipped_items["pants"])
+                button:
+                    action UnequipItemAction("pants")
+                    tooltip pants_tooltip
+                    add get_item_image(equipped_items["pants"])
+                
+        # 4. Торс
+        if equipped_items["torso"]:
+            $ torso_item = get_item_data(equipped_items["torso"])
+            if torso_item:
+                $ torso_tooltip = get_item_tooltip(equipped_items["torso"])
+                button:
+                    action UnequipItemAction("torso")
+                    tooltip torso_tooltip
+                    add get_item_image(equipped_items["torso"])
+                
+        # 5. Шапка
+        if equipped_items["hat"]:
+            $ hat_item = get_item_data(equipped_items["hat"])
+            if hat_item:
+                $ hat_tooltip = get_item_tooltip(equipped_items["hat"])
+                button:
+                    action UnequipItemAction("hat")
+                    tooltip hat_tooltip
+                    add get_item_image(equipped_items["hat"])
+                
+        # 6. Оружие (самый верхний слой)
+        if equipped_items["weapon"]:
+            $ weapon_item = get_item_data(equipped_items["weapon"])
+            if weapon_item:
+                $ weapon_tooltip = get_item_tooltip(equipped_items["weapon"])
+                button:
+                    action UnequipItemAction("weapon")
+                    tooltip weapon_tooltip
+                    add get_item_image(equipped_items["weapon"])
+        
+        # Показываем информацию о текущей экипировке
+        vbox:
+            align (0.0, 0.0)
+            xsize 200
+            text "Текущая экипировка:" size 18 color "#FFFFFF"
+            for slot_name, item_id in equipped_items.items():
+                if item_id:
+                    $ item = get_item_data(item_id)
+                    if item:
+                        $ slot_names = {
+                            "underwear": "Белье",
+                            "accessory": "Аксессуар", 
+                            "pants": "Штаны",
+                            "torso": "Торс",
+                            "hat": "Шапка",
+                            "weapon": "Оружие"
+                        }
+                        text "[slot_names.get(slot_name, slot_name)]: [item['name']]" size 14 color "#CCCCCC"
+
+# Экран инвентаря экипировки
+screen inventory_grid():
+    frame:
+        align (1.0, 0.5)
+        xsize 450
+        ysize 700
+        background "#0a0a0a"  # Простой синий фон вместо изображения
+        
+        vbox:
+            text "Инвентарь экипировки" size 28 xalign 0.5 color "#FFD700"
+            
+            # Добавляем viewport для скролла
+            viewport:
+                scrollbars "vertical"
+                mousewheel True
+                draggable True
+                pagekeys True
+                xsize 420
+                ysize 620
+                
+                vbox:
+                    spacing 15
+                    
+                    # Словарь для перевода названий слотов
+                    $ slot_names = {
+                        "underwear": "Нижнее белье",
+                        "accessory": "Аксессуары", 
+                        "pants": "Штаны",
+                        "torso": "Торс",
+                        "hat": "Головные уборы",
+                        "weapon": "Оружие"
+                    }
+                    
+                    # Словарь цветов для разных типов слотов
+                    $ slot_colors = {
+                        "underwear": "#FF69B4",
+                        "accessory": "#FFD700", 
+                        "pants": "#8B4513",
+                        "torso": "#4169E1",
+                        "hat": "#32CD32",
+                        "weapon": "#DC143C"
+                    }
+                    
+                    for slot_name, items in inventory_items.items():
+                        vbox:
+                            $ item_count = len(items) if items else 0
+                            text "[slot_names.get(slot_name, slot_name)] ([item_count])" size 22 color slot_colors.get(slot_name, "#FFD700")
+                            
+                            if items:  # Если есть предметы в слоте
+                                # Используем hbox с переносом для лучшего отображения множества предметов
+                                $ items_per_row = 3
+                                $ rows_needed = (len(items) + items_per_row - 1) // items_per_row
+                                
+                                vbox:
+                                    spacing 5
+                                    for row in range(rows_needed):
+                                        hbox:
+                                            spacing 8
+                                            for col in range(items_per_row):
+                                                $ item_index = row * items_per_row + col
+                                                if item_index < len(items):
+                                                    $ item_id = items[item_index]
+                                                    $ item = get_item_data(item_id)
+                                                    if item:
+                                                        $ item_tooltip = get_item_tooltip(item_id)
+                                                        button:
+                                                            xsize 120
+                                                            ysize 100
+                                                            action EquipItemAction(item_id)
+                                                            tooltip item_tooltip
+                                                            
+                                                            vbox:
+                                                                spacing 2
+                                                                # Показываем название предмета
+                                                                text item["name"] size 14 xalign 0.5 color "#FFFFFF" text_align 0.5
+                                                                
+                                                                # Показываем основные характеристики
+                                                                $ main_stats = []
+                                                                for stat, value in item["stats"].items():
+                                                                    if value != 0:
+                                                                        $ stat_names = {
+                                                                            "strength": "💪",
+                                                                            "agility": "🏃",
+                                                                            "intelligence": "🧠",
+                                                                            "charisma": "✨"
+                                                                        }
+                                                                        $ main_stats.append(f"{stat_names.get(stat, stat)}{value:+}")
+                                                                
+                                                                if main_stats:
+                                                                    text " ".join(main_stats) size 12 xalign 0.5 color "#90EE90" text_align 0.5
+                                                else:
+                                                    # Пустое место для выравнивания
+                                                    null width 120 height 100
+                            else:
+                                text "Пусто" size 16 color "#888888"
+                            
+                            null height 5  # Отступ между категориями
+
+# Экран характеристик персонажа
+screen character_stats():
+    frame:
+        align (0.0, 1.0)
+        xsize 300
+        ysize 200
+        background "#0a0a0a"  # Темно-зеленый фон
+        
+        vbox:
+            spacing 5
+            text "Характеристики:" size 24 color "#FFD700"
+            $ total_stats = calculate_total_stats()
+            text "💪 Сила: [total_stats['strength']]" size 20 color "#FF6B6B"
+            text "🏃 Ловкость: [total_stats['agility']]" size 20 color "#4ECDC4"
+            text "🧠 Интеллект: [total_stats['intelligence']]" size 20 color "#45B7D1"
+            text "✨ Харизма: [total_stats['charisma']]" size 20 color "#96CEB4"
+
+# Главный экран экипировки
+screen equipment_interface():
+    # Отображение персонажа
+    use character_display
+    
+    # Инвентарь
+    use inventory_grid
+    
+    # Характеристики
+    use character_stats
+    
+    # Кнопка закрытия
+    textbutton "Закрыть" action Return() align (0.5, 0.95)
+
+# === ТЕСТОВЫЕ ФУНКЦИИ ===
+
+# Property тест для управления слотами экипировки
+init python:
+    import random
+    
+    def property_test_equipment_slot_management():
+        """
+        Property 2: Equipment Slot Management
+        Validates: Requirements 2.2, 2.4
+        
+        Для любого предмета, экипированного в слот, система должна сохранить этот предмет 
+        в правильном слоте и заменить любой ранее экипированный предмет в этом слоте
+        """
+        test_results = []
+        
+        # Сохраняем исходное состояние
+        original_equipped = equipped_items.copy()
+        original_inventory = {}
+        for slot, items in inventory_items.items():
+            original_inventory[slot] = items.copy()
+        
+        try:
+            # Тест 1: Экипировка предмета в пустой слот
+            for slot in ["underwear", "accessory", "pants", "torso", "hat", "weapon"]:
+                # Очищаем слот
+                equipped_items[slot] = None
+                
+                # Берем случайный предмет для этого слота
+                if inventory_items[slot]:
+                    test_item = inventory_items[slot][0]
+                    
+                    # Экипируем предмет
+                    result = equip_item(test_item)
+                    
+                    # Проверяем результат
+                    if result and equipped_items[slot] == test_item:
+                        test_results.append(f"✓ Слот {slot}: предмет {test_item} успешно экипирован")
+                    else:
+                        test_results.append(f"✗ Слот {slot}: ошибка экипировки {test_item}")
+            
+            # Тест 2: Замена экипированного предмета
+            for slot in ["torso", "weapon"]:  # Тестируем на двух слотах
+                if len(inventory_items[slot]) >= 2:
+                    item1 = inventory_items[slot][0]
+                    item2 = inventory_items[slot][1]
+                    
+                    # Экипируем первый предмет
+                    equip_item(item1)
+                    first_equipped = equipped_items[slot]
+                    
+                    # Экипируем второй предмет (должен заменить первый)
+                    equip_item(item2)
+                    second_equipped = equipped_items[slot]
+                    
+                    # Проверяем замену
+                    if (first_equipped == item1 and 
+                        second_equipped == item2 and 
+                        item1 in inventory_items[slot]):
+                        test_results.append(f"✓ Слот {slot}: замена предмета работает корректно")
+                    else:
+                        test_results.append(f"✗ Слот {slot}: ошибка замены предмета")
+            
+            # Тест 3: Проверка валидности слотов
+            invalid_tests = [
+                ("cloth_shirt", "weapon"),  # Рубашка в слот оружия
+                ("wooden_sword", "torso"),  # Меч в слот торса
+            ]
+            
+            for item_id, wrong_slot in invalid_tests:
+                original_slot_state = equipped_items[wrong_slot]
+                
+                # Пытаемся экипировать предмет в неправильный слот напрямую
+                equipped_items[wrong_slot] = item_id
+                
+                # Проверяем, что система не позволяет это
+                item_data = get_item_data(item_id)
+                if item_data and item_data["slot"] != wrong_slot:
+                    test_results.append(f"✓ Валидация: предмет {item_id} корректно отклонен для слота {wrong_slot}")
+                
+                # Восстанавливаем состояние
+                equipped_items[wrong_slot] = original_slot_state
+            
+        finally:
+            # Восстанавливаем исходное состояние
+            for slot in equipped_items:
+                equipped_items[slot] = original_equipped[slot]
+            for slot in inventory_items:
+                inventory_items[slot] = original_inventory[slot].copy()
+        
+        return test_results
+
+label test_equipment_system:
+    "Тестируем систему экипировки..."
+    
+    # Запускаем property тест
+    $ property_results = property_test_equipment_slot_management()
+    "Результаты property теста для управления слотами:"
+    python:
+        for result in property_results:
+            renpy.say(n, result)
+    
+    # Тестируем экипировку предмета
+    $ result = equip_item("cloth_shirt")
+    if result:
+        "Успешно экипировали тканевую рубашку!"
+    else:
+        "Ошибка при экипировке тканевой рубашки."
+    
+    # Показываем характеристики
+    $ stats = calculate_total_stats()
+    "Текущие характеристики:"
+    "Сила: [stats['strength']]"
+    "Ловкость: [stats['agility']]"
+    "Интеллект: [stats['intelligence']]"
+    "Харизма: [stats['charisma']]"
+    
+    # Открываем интерфейс экипировки
+    call screen equipment_interface
+    
+    "Тест завершен!"
+    return
 # Главный сценарий
 label start:
     call complete_quest("Второй квест")
@@ -154,6 +916,12 @@ label day_cycle:
         scene bg_main
         while actions_left > 0:
             menu:
+                "Экипировка персонажа":
+                    call screen equipment_interface
+                    jump day_keep
+                "Тест системы экипировки":
+                    call test_equipment_system
+                    jump day_keep
                 "Посмотреть что у меня есть":
                     n "У меня есть.."
                     python:

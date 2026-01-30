@@ -1,35 +1,57 @@
 ﻿I'm sorry, but an uncaught exception occurred.
 
 While running game code:
-  File "game/script.rpy", line 144, in script call
+  File "game/script.rpy", line 791, in script call
     call day_cycle
-  File "game/script.rpy", line 286, in script
-    menu:
-  File "game/screens.rpy", line 207, in execute
-    screen choice(items):
-  File "game/screens.rpy", line 207, in execute
-    screen choice(items):
-  File "game/screens.rpy", line 210, in execute
+  File "game/script.rpy", line 805, in script
+    call screen equipment_interface
+  File "renpy/common/000statements.rpy", line 671, in execute_call_screen
+    store._return = renpy.call_screen(name, *args, **kwargs)
+  File "game/script.rpy", line 648, in execute
+    screen equipment_interface():
+  File "game/script.rpy", line 648, in execute
+    screen equipment_interface():
+  File "game/script.rpy", line 653, in execute
+    use inventory_grid
+  File "game/script.rpy", line 548, in execute
+    screen inventory_grid():
+  File "game/script.rpy", line 548, in execute
+    screen inventory_grid():
+  File "game/script.rpy", line 549, in execute
+    frame:
+  File "game/script.rpy", line 555, in execute
     vbox:
-  File "game/screens.rpy", line 211, in execute
-    for i in items:
-  File "game/screens.rpy", line 212, in execute
-    textbutton i.caption action i.action
-NameError: Name 'food_cost' is not defined.
+  File "game/script.rpy", line 559, in execute
+    viewport:
+  File "game/script.rpy", line 565, in execute
+    vbox:
+  File "game/script.rpy", line 588, in execute
+    for slot_name, items in inventory_items.items():
+  File "game/script.rpy", line 589, in execute
+    vbox:
+  File "game/script.rpy", line 592, in execute
+    if items:  # Если есть предметы в слоте
+  File "game/script.rpy", line 594, in execute
+    grid 3 None:  # 3 колонки, неограниченное количество строк
+TypeError: int() argument must be a string, a bytes-like object or a number, not 'NoneType'
 
 -- Full Traceback ------------------------------------------------------------
 
 Full traceback:
-  File "game/script.rpy", line 144, in script call
+  File "game/script.rpy", line 791, in script call
     call day_cycle
-  File "game/script.rpy", line 286, in script
-    menu:
-  File "E:\Renpy\renpy-8.3.3-sdk\renpy\ast.py", line 1619, in execute
-    choice = renpy.exports.menu(choices, self.set, args, kwargs, item_arguments)
-  File "E:\Renpy\renpy-8.3.3-sdk\renpy\exports\menuexports.py", line 134, in menu
-    rv = renpy.store.menu(new_items)
-  File "E:\Renpy\renpy-8.3.3-sdk\renpy\exports\menuexports.py", line 424, in display_menu
-    rv = renpy.ui.interact(mouse='menu', type=type, roll_forward=roll_forward)
+  File "game/script.rpy", line 805, in script
+    call screen equipment_interface
+  File "E:\Renpy\renpy-8.3.3-sdk\renpy\ast.py", line 1974, in execute
+    self.call("execute")
+  File "E:\Renpy\renpy-8.3.3-sdk\renpy\ast.py", line 1953, in call
+    return renpy.statements.call(method, parsed, *args, **kwargs)
+  File "E:\Renpy\renpy-8.3.3-sdk\renpy\statements.py", line 374, in call
+    return method(parsed, *args, **kwargs)
+  File "renpy/common/000statements.rpy", line 671, in execute_call_screen
+    store._return = renpy.call_screen(name, *args, **kwargs)
+  File "E:\Renpy\renpy-8.3.3-sdk\renpy\exports\statementexports.py", line 345, in call_screen
+    rv = renpy.ui.interact(mouse="screen", type="screen", roll_forward=roll_forward)
   File "E:\Renpy\renpy-8.3.3-sdk\renpy\ui.py", line 301, in interact
     rv = renpy.game.interface.interact(roll_forward=roll_forward, **kwargs)
   File "E:\Renpy\renpy-8.3.3-sdk\renpy\display\core.py", line 2215, in interact
@@ -50,38 +72,37 @@ Full traceback:
     self.update()
   File "E:\Renpy\renpy-8.3.3-sdk\renpy\display\screen.py", line 697, in update
     self.screen.function(**self.scope)
-  File "game/screens.rpy", line 207, in execute
-    screen choice(items):
-  File "game/screens.rpy", line 207, in execute
-    screen choice(items):
-  File "game/screens.rpy", line 210, in execute
+  File "game/script.rpy", line 648, in execute
+    screen equipment_interface():
+  File "game/script.rpy", line 648, in execute
+    screen equipment_interface():
+  File "game/script.rpy", line 653, in execute
+    use inventory_grid
+  File "game/script.rpy", line 548, in execute
+    screen inventory_grid():
+  File "game/script.rpy", line 548, in execute
+    screen inventory_grid():
+  File "game/script.rpy", line 549, in execute
+    frame:
+  File "game/script.rpy", line 555, in execute
     vbox:
-  File "game/screens.rpy", line 211, in execute
-    for i in items:
-  File "game/screens.rpy", line 212, in execute
-    textbutton i.caption action i.action
-  File "E:\Renpy\renpy-8.3.3-sdk\renpy\ui.py", line 1015, in _textbutton
-    text = renpy.text.text.Text(label, style=text_style, substitute=substitute, scope=scope, **text_kwargs)
-  File "E:\Renpy\renpy-8.3.3-sdk\renpy\text\text.py", line 2063, in __init__
-    self.set_text(text, scope, substitute) # type: ignore
-  File "E:\Renpy\renpy-8.3.3-sdk\renpy\text\text.py", line 2196, in set_text
-    i, did_sub = renpy.substitutions.substitute(i, scope, substitute) # type: ignore
-  File "E:\Renpy\renpy-8.3.3-sdk\renpy\substitutions.py", line 373, in substitute
-    s = interpolate(s, variables) # type: ignore
-  File "E:\Renpy\renpy-8.3.3-sdk\renpy\substitutions.py", line 86, in interpolate
-    raise e
-  File "E:\Renpy\renpy-8.3.3-sdk\renpy\substitutions.py", line 78, in interpolate
-    value = renpy.python.py_eval(code, {}, scope)
-  File "E:\Renpy\renpy-8.3.3-sdk\renpy\python.py", line 1209, in py_eval
-    return py_eval_bytecode(code, globals, locals)
-  File "E:\Renpy\renpy-8.3.3-sdk\renpy\python.py", line 1202, in py_eval_bytecode
-    return eval(bytecode, globals, locals)
-  File "<none>", line 1, in <module>
-  File "E:\Renpy\renpy-8.3.3-sdk\renpy\substitutions.py", line 313, in __getitem__
-    raise NameError("Name '{}' is not defined.".format(key))
-NameError: Name 'food_cost' is not defined.
+  File "game/script.rpy", line 559, in execute
+    viewport:
+  File "game/script.rpy", line 565, in execute
+    vbox:
+  File "game/script.rpy", line 588, in execute
+    for slot_name, items in inventory_items.items():
+  File "game/script.rpy", line 589, in execute
+    vbox:
+  File "game/script.rpy", line 592, in execute
+    if items:  # Если есть предметы в слоте
+  File "game/script.rpy", line 594, in execute
+    grid 3 None:  # 3 колонки, неограниченное количество строк
+  File "E:\Renpy\renpy-8.3.3-sdk\renpy\display\layout.py", line 457, in __init__
+    rows = int(rows)
+TypeError: int() argument must be a string, a bytes-like object or a number, not 'NoneType'
 
 Windows-10-10.0.19045 AMD64
 Ren'Py 8.3.3.24111502
 Ядротаун 1.0
-Wed Feb  5 23:03:55 2025
+Fri Jan 30 22:25:14 2026

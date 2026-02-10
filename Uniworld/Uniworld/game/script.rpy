@@ -74,9 +74,10 @@ default inventory_items = {
 # Определение класса для инвентаря
 init python:
     class Item:
-        def __init__(self, name, description, wasted=False):
+        def __init__(self, name, description, image=None, wasted=False):
             self.name = name
             self.description = description
+            self.image = image  # None если нет изображения
             self.wasted = wasted
 
 # === ОПРЕДЕЛЕНИЯ ПРЕДМЕТОВ ЭКИПИРОВКИ ===
@@ -387,7 +388,11 @@ init python:
         return "\n".join(tooltip_parts)
 
 # Определения предметов
-default all_items = []
+default all_items = [
+    Item("Старый ключ 🔑", "Ржавый ключ от неизвестной двери", None),
+    Item("Записка 📝", "Загадочная записка с координатами", None),
+    Item("Монета 🪙", "Древняя золотая монета", None)
+]
 
 # === ФУНКЦИИ УПРАВЛЕНИЯ ЭКИПИРОВКОЙ ===
 init python:
@@ -468,28 +473,33 @@ init python:
             renpy.restart_interaction()
 
 # Функция для добавления нового предмета
-label item_add(name, description, wasted=False):
+label item_add(name, description, image=None, wasted=False):
     # Проверяем, есть ли уже предмет с таким именем
     $ item_exists = any(item.name == name for item in all_items)
     
     if item_exists:
         n "У вас уже есть предмет '[name]'."
         return  # Выходим из функции, если предмет уже есть
-    $ new_item = Item(name, description)
+    
+    $ new_item = Item(name, description, image, wasted)
     $ all_items.append(new_item)
     n "Предмет '[name]' добавлен в ваш инвентарь."
     return
+
 # Функция для удаления предмета
 label item_remove(item_name):
     $ item_to_remove = None
-    # Ищем квест по имени
+    # Ищем предмет по имени
     $ item_to_remove = next((item for item in all_items if item.name == item_name), None)
 
     if item_to_remove:
-        # Устанавливаем статус завершения квеста
+        # Устанавливаем статус использования предмета
         $ item_to_remove.wasted = True
-        # Удаляем завершенный квест
+        # Удаляем использованный предмет
         $ all_items.remove(item_to_remove)
+        n "Предмет '[item_name]' удален из инвентаря."
+    else:
+        n "Предмет '[item_name]' не найден в инвентаре."
     return
 
 # Определение класса для квестов
@@ -527,8 +537,21 @@ label complete_quest(quest_name):
 
 # Экран ресурсов
 screen resources():
+    # Кнопка инвентаря в правом верхнем углу (над ресурсами)
+    textbutton "🎒":
+        align (1.0, 0.0)  # Прижато к правому верхнему углу
+        xoffset -10  # Небольшой отступ от края
+        yoffset 10
+        action Show("items_inventory")
+        xsize 60
+        ysize 60
+        text_size 40
+    
+    # Ресурсы прижаты к правому краю, ниже кнопки
     frame:
         align (1.0, 0.0)
+        xoffset -10  # Отступ от правого края
+        yoffset 80  # Отступ сверху (под кнопкой инвентаря)
         vbox:
             spacing 5
             text "[hp_icon] Зворовье: [hp]" size 20
@@ -550,6 +573,133 @@ screen quests():
                     text "[quest.description]" size 15
 
 # === ЭКРАНЫ СИСТЕМЫ ЭКИПИРОВКИ ===
+
+# Экран для отображения tooltip
+screen item_tooltip(tooltip_text):
+    zorder 100
+    
+    frame:
+        at transform:
+            alpha 0.0
+            linear 0.2 alpha 1.0
+        
+        xalign 0.5
+        yalign 0.1
+        xmaximum 400
+        background "#000000E0"  # Полупрозрачный черный
+        padding (15, 15)
+        
+        text tooltip_text:
+            size 18
+            color "#FFFFFF"
+            text_align 0.5
+            xalign 0.5
+
+# Экран инвентаря предметов (не экипировка)
+screen items_inventory():
+    modal True
+    
+    # === НАСТРОЙКА ЦВЕТОВ ===
+    # Измените эти значения для изменения цветовой схемы
+    $ bg_color = "#111112"        # Основной фон окна (темно-синий)
+    $ title_color = "#FFFFFF"     # Цвет заголовка (золотой)
+    $ card_bg_color = "#434345"   # Фон карточек предметов (синий)
+    $ item_name_color = "#FFFFFF" # Цвет названия предмета (белый)
+    $ item_desc_color = "#FFFFFF" # Цвет описания предмета (светло-серый)
+    $ empty_text_color = "#FFFFFF" # Цвет текста "Инвентарь пуст" (серый)
+    
+    frame:
+        align (0.5, 0.5)
+        xsize 900
+        ysize 700
+        background bg_color  # Используем настраиваемый цвет
+        
+        vbox:
+            spacing 10
+            
+            # Заголовок
+            hbox:
+                xalign 0.5
+                text "Инвентарь предметов" size 32 color title_color
+            
+            # Viewport со скроллом
+            viewport:
+                scrollbars "vertical"
+                mousewheel True
+                draggable True
+                pagekeys True
+                xsize 870
+                ysize 580
+                
+                vbox:
+                    spacing 10
+                    
+                    if all_items:
+                        # Подсчитываем количество предметов и строк
+                        $ items_per_row = 4
+                        $ total_items = len(all_items)
+                        $ rows_needed = (total_items + items_per_row - 1) // items_per_row
+                        
+                        # Создаем сетку предметов
+                        for row in range(rows_needed):
+                            hbox:
+                                spacing 15
+                                for col in range(items_per_row):
+                                    $ item_index = row * items_per_row + col
+                                    if item_index < total_items:
+                                        $ item = all_items[item_index]
+                                        
+                                        $ full_description = item.name + "\n\n" + item.description
+                                        
+                                        button:
+                                            xsize 200
+                                            ysize 200
+                                            background card_bg_color
+                                            action NullAction()
+                                            hovered Show("item_tooltip", tooltip_text=full_description)
+                                            unhovered Hide("item_tooltip")
+                                            
+                                            vbox:
+                                                spacing 5
+                                                xalign 0.5  # Центрируем весь vbox
+                                                
+                                                # Изображение предмета (квадратное, центрированное)
+                                                if item.image:
+                                                    frame:
+                                                        xsize 140
+                                                        ysize 140
+                                                        xalign 0.5  # Центрируем по горизонтали
+                                                        background Solid("#555555")
+                                                        
+                                                        add item.image:
+                                                            xalign 0.5
+                                                            yalign 0.5
+                                                            xsize 130
+                                                            ysize 130
+                                                            fit "contain"
+                                                else:
+                                                    # Заглушка если нет изображения (квадратная, центрированная)
+                                                    frame:
+                                                        xsize 140
+                                                        ysize 140
+                                                        xalign 0.5  # Центрируем по горизонтали
+                                                        background Solid("#555555")
+                                                        text "?" size 60 xalign 0.5 yalign 0.5 color "#FFFFFF"
+                                                
+                                                # Название предмета (центрированное)
+                                                text item.name size 16 xalign 0.5 color item_name_color text_align 0.5
+                                                
+                                                # Описание (короткое, центрированное)
+                                                $ short_desc = item.description[:30] + "..." if len(item.description) > 30 else item.description
+                                                text short_desc size 12 xalign 0.5 color item_desc_color text_align 0.5
+                                    else:
+                                        # Пустое место для выравнивания
+                                        null width 200 height 200
+                    else:
+                        text "Инвентарь пуст" size 24 xalign 0.5 color empty_text_color
+            
+            # Кнопка закрытия
+            textbutton "Закрыть" action Hide("items_inventory") xalign 0.5 ysize 40 xsize 200
 
 # Экран отображения персонажа с экипировкой
 screen character_display():
@@ -922,24 +1072,12 @@ label day_cycle:
                 "Тест системы экипировки":
                     call test_equipment_system
                     jump day_keep
-                "Посмотреть что у меня есть":
-                    n "У меня есть.."
-                    python:
-                        # Создаем список строк для вывода
-                        item_lines = []
-                        for item in all_items:
-                            item_lines.append(f"{item.name} - {item.description}")
-                        # Объединяем строки в одну
-                        item_text = "\n".join(item_lines)
-                    # Выводим текст после блока python
-                    n "[item_text]"
+                "Подобрать зелье":
+                    call item_add("Зелье 🧪", "Загадочное зелье, стоит ли eго пить?", "items/potion.png")
                     jump day_keep
-                "Потерять карандаш":
-                    call item_remove("Карандаш ✏️")
+                "Выбросить зелье":
+                    call item_remove("Зелье 🧪")
                     jump day_keep
-                "Найти карандаш":
-                    call item_add("Карандаш ✏️", "Я могу им написать что-то")
-                    jump day_keep     
                 "Выйти из дома":
                     jump go
     n "У меня совсем не осталось сил.. Нужно поспать."

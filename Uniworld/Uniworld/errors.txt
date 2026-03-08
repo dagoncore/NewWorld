@@ -2,13 +2,9 @@
 errors listed below, and try again.
 
 
-File "game/script.rpy", line 550: The add statement is not a valid child of the imagebutton statement.
-    add Text("🎒", size=40, xalign=0.5, yalign=0.5)
-       ^
-
-File "game/script.rpy", line 650: The if statement is not a valid child of the text statement.
-    text item.description[:30] + "..." if len(item.description) > 30 else item.description size 12 xalign 0.5 color "#CCCCCC" text_align 0.5
-                                         ^
+File "game/script.rpy", line 1131: expected statement.
+    tomato +=1
+           ^
 
 Ren'Py Version: Ren'Py 8.3.3.24111502
-Tue Feb 10 02:38:50 2026
+Tue Feb 24 16:55:01 2026

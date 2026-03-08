@@ -4,8 +4,11 @@ define k = Character("Карма", color="#00FF00")
 define c = Character("Чарли", color="#F0E68C")
 
 # Фоны
-image bg_main = "backgrounds/background_home.jpg"
-image food_base = "backgrounds/food_base.jpg"
+image bg_main_out = "backgrounds/hero_home.png"
+image bg_main = "backgrounds/hero_home_in.png"
+image garden = "backgrounds/garden.png"
+image food_base = "backgrounds/farmer_home_out.png"
+image food_base_in = "backgrounds/farmer_home_in.png"
 image home_base = "backgrounds/home_base.jpg"
 image explore_base = "backgrounds/explore_base.jpg"
 image center_base = "backgrounds/center_base.jpg"
@@ -13,11 +16,11 @@ image factory_base = "backgrounds/factory_base.jpg"
 image dig_base = "backgrounds/dig_base.jpg"
 
 # Персонажи
-# Карма
-image k_full = "characters/karma/karma_full.png"
+# Малини
+image m_f = "characters/karma/karma_full.png"
 image k_smile = "characters/karma/karma_smile.png"
 image k_blink = "characters/karma/karma_blink.png"
-image k_nude = "characters/karma/karma_nude.png"
+image m = "characters/malini/m.png"
 # Хейз
 image h_full = "characters/haze/haze_full.png"
 
@@ -37,6 +40,7 @@ default starve = 0
 default nsfw = 1
 default food_price = 10
 default actions_left = 20  # Лимит действий в день
+default tomato = 0
 
 #События
 default storage_pussy = 0
@@ -1051,8 +1055,8 @@ label start:
     scene bg_main
     show screen resources
     show screen quests
-    show h_full at left
-    n "Очередной день в Ядротауне.."
+    show m at left
+    n "Очередной день в Сантауне!"
     call day_cycle
     return
 
@@ -1069,9 +1073,9 @@ label day_cycle:
                 "Экипировка персонажа":
                     call screen equipment_interface
                     jump day_keep
-                "Тест системы экипировки":
-                    call test_equipment_system
-                    jump day_keep
+                # "Тест системы экипировки":
+                #     call test_equipment_system
+                #     jump day_keep
                 "Подобрать зелье":
                     call item_add("Зелье 🧪", "Загадочное зелье, стоит ли eго пить?", "items/potion.png")
                     jump day_keep
@@ -1083,10 +1087,10 @@ label day_cycle:
     n "У меня совсем не осталось сил.. Нужно поспать."
     jump day_end
     label go:
-        scene bg_main
+        scene bg_main_out
         while actions_left > 0:
             menu:
-                "Отправиться в {color=#8ccb5e}Пищевой комплекс{/color}":
+                "Отправиться в {color=#8ccb5e}Дом фермерши{/color}":
                     jump food_base
                 "Прогуляться по {color=#adffff}Жилому району{/color}":
                     jump home_base
@@ -1110,37 +1114,51 @@ label food_base:
     scene food_base
     n "Куда мне нужно пойти?"
     menu:
-        "Теплицы":
+        "Грядки":
             jump greenhouse
-        "Склад":
+        "Войти в дом":
             jump storage
-        "Лаборатория":
-            jump lab
         "Вернуться":
             jump go
 
 label greenhouse:
     scene food_base
-    menu:
-        "Поработать в теплицах (примерно +100 Тепломарки [gold_icon],+20 Еды [food_icon])":
-            python:
-                import random
-                gold_add = random.randint(50, 150)
-                food_add = 20
-            $ gold += gold_add
-            $ food += food_add
-            $ rep += 1
-            $ actions_left -= 5
-            n "Сегодня удалось заработать [gold_add] тепломарок [gold_icon], а также я получил дополнительно 20 Еды [food_icon]."
-            jump greenhouse
-        "Вернуться":
-            jump food_base            
-        "Пойти домой":
-            jump day_keep
+    if actions_left > 10:
+        menu:
+            "Проверить грядки":
+                scene garden
+                if 1 <= tomato < 3:
+                    $ tomato += 1
+                    n "Помидор немного подрос." 
+                    jump greenhouse
+                elif tomato == 0:
+                    menu:
+                        "Посадить помидор":
+                            $ tomato = 1
+                            n "Я посадил помидор."
+                            jump greenhouse
+                        "Вернуться":
+                            jump greenhouse
+                else:
+                    n "Помидоры выросли!"
+                    menu:
+                        "Собрать урожай":
+                            call item_add("Помидор 🍅", "Такой красный и сочный", "items/tomato.png")
+                            $ tomato = 0 # Обычно после сбора урожай обнуляется
+                            jump greenhouse
+                        "Вернуться":
+                            jump greenhouse
+            "Вернуться":
+                jump food_base            
+            "Пойти домой":
+                jump day_keep
+    else:
+        n "У меня нет сил."
+        jump greenhouse
 label storage:
-    scene food_base
+    scene food_base_in
     menu:
-        "Поработать на складе (примерно +50 Тепломарки [gold_icon],+50 Еды [food_icon])":
+        "Поработать на ферме (примерно +50 монет [gold_icon],+50 Еды [food_icon])":
             python:
                 import random
                 gold_add = random.randint(25, 75)
@@ -1149,30 +1167,32 @@ label storage:
             $ food += food_add
             $ rep += 1
             $ actions_left -= 5
-            n "Сегодня удалось заработать [gold_add] тепломарок [gold_icon], а также я получил дополнительно [food_add] Еды [food_icon]."
+            n "Сегодня удалось заработать [gold_add] монет [gold_icon], а также я получил дополнительно [food_add] Еды [food_icon]."
             jump storage
-        "Воровать (примерно +300 Еды [food_icon], -25 Репутации [rep_icon])":
-            python:
-                import random
-                food_add = random.randint(200, 400)
-            $ food += food_add
-            $ rep -= 25
-            $ actions_left -= 5
-            n "Я украл [food_add] Еды [food_icon]. (-25 Репутации [rep_icon])"
-            jump storage
-        "Волонтёрство (примерно 25 тепломарок [gold_icon] и 5 репутации [rep_icon])":
-            python:
-                import random
-                gold_add = random.randint(0, 50)
-                food_add = 50
-            $ gold += gold_add
-            $ food += food_add
-            $ rep += 5
-            $ actions_left -= 5
-            n "Сегодня удалось заработать [gold_add] тепломарок [gold_icon], а также я получил дополнительно [food_add] Еды [food_icon]."
-            jump storage
-        "Вернуться":
-            jump food_base
+        "Пойти домой":
+            jump day_keep
+        # "Воровать (примерно +300 Еды [food_icon], -25 Репутации [rep_icon])":
+        #     python:
+        #         import random
+        #         food_add = random.randint(200, 400)
+        #     $ food += food_add
+        #     $ rep -= 25
+        #     $ actions_left -= 5
+        #     n "Я украл [food_add] Еды [food_icon]. (-25 Репутации [rep_icon])"
+        #     jump storage
+        # "Волонтёрство (примерно 25 тепломарок [gold_icon] и 5 репутации [rep_icon])":
+        #     python:
+        #         import random
+        #         gold_add = random.randint(0, 50)
+        #         food_add = 50
+        #     $ gold += gold_add
+        #     $ food += food_add
+        #     $ rep += 5
+        #     $ actions_left -= 5
+        #     n "Сегодня удалось заработать [gold_add] тепломарок [gold_icon], а также я получил дополнительно [food_add] Еды [food_icon]."
+        #     jump storage
+        # "Вернуться":
+        #     jump food_base
 label lab:
     n "В разработке..."
 
